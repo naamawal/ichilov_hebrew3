@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ichilov PT App — אב טיפוס עברית v3.1</title>
+<!-- TODO: Replace terracotta (#C67F55) with purple palette per Ichilov team preference (next visual iteration) -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F8F3EB; --black: #1A1A1A;
+    --terracotta: #C67F55; /* TODO: Replace with Ichilov purple palette */
+    --sage: #829383; --beige: #D9AD8D; --sand: #E2B07E;
+    --white: #ffffff; --border: #E0D9CE; --alert-red: #D94F4F; --alert-green: #4F9D69;
+    --purple-light: #EEE8F8; /* placeholder for future purple theme */
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: #1e1e1e; color: var(--black); min-height: 100vh; }
+
+  .nav { background: #1A1A1A; padding: 10px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; position: sticky; top: 0; z-index: 100; }
+  .nav-logo { font-family: 'Playfair Display', serif; color: var(--cream); font-size: 15px; font-weight: 700; }
+  .nav-logo span { color: var(--terracotta); }
+  .nav-sep { width: 1px; height: 18px; background: #444; }
+  .nav-label { color: #888; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; }
+  .tabs { display: flex; gap: 3px; flex-wrap: wrap; }
+  .tab { background: transparent; border: 1px solid #444; color: #aaa; padding: 5px 10px; border-radius: 5px; font-size: 11px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+  .tab:hover { border-color: var(--terracotta); color: var(--cream); }
+  .tab.active { background: var(--terracotta); border-color: var(--terracotta); color: white; }
+
+  .stage { display: flex; justify-content: center; gap: 24px; padding: 24px 16px; align-items: flex-start; min-height: calc(100vh - 53px); }
+
+  .mobile-frame { width: 330px; background: var(--cream); border-radius: 38px; border: 7px solid #1a1a1a; box-shadow: 0 0 0 2px #444, 0 30px 60px rgba(0,0,0,0.5); overflow: hidden; flex-shrink: 0; }
+  .notch { width: 95px; height: 22px; background: #1a1a1a; border-radius: 0 0 14px 14px; margin: 0 auto; }
+
+  .desktop-wrap { width: 820px; background: var(--cream); border-radius: 9px; border: 1px solid #555; box-shadow: 0 0 0 1px #333, 0 30px 60px rgba(0,0,0,0.5); overflow: hidden; flex-shrink: 0; }
+  .dt-bar { background: #1A1A1A; height: 30px; display: flex; align-items: center; padding: 0 12px; gap: 6px; }
+  .dt-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dt-url { background: #333; border-radius: 3px; flex: 1; max-width: 220px; height: 15px; margin: 0 auto; }
+
+  .annot { width: 230px; flex-shrink: 0; background: rgba(255,255,255,0.04); border: 1px solid #444; border-radius: 10px; padding: 16px; color: var(--cream); position: sticky; top: 70px; }
+  .annot h3 { font-family: 'Playfair Display', serif; font-size: 14px; color: var(--sand); margin-bottom: 10px; }
+  .annot-item { margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #333; font-size: 11px; line-height: 1.5; color: #ccc; }
+  .annot-item:last-child { border-bottom: none; margin-bottom: 0; }
+  .annot-item strong { color: var(--sand); display: block; margin-bottom: 3px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* Patient screens */
+  .p-screen { background: var(--cream); min-height: 600px; }
+  .p-login { background: var(--cream); padding: 36px 26px; text-align: center; min-height: 600px; display: flex; flex-direction: column; justify-content: center; gap: 20px; }
+  .logo-mark { width: 56px; height: 56px; background: var(--terracotta); border-radius: 16px; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; color: white; font-size: 20px; }
+  .p-login h1 { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--black); line-height: 1.3; }
+  .input-group label { font-size: 11px; font-weight: 500; color: #666; display: block; margin-bottom: 5px; text-align: right; }
+  .input-mock { width: 100%; border: 1.5px solid var(--terracotta); border-radius: 9px; padding: 13px 14px; font-size: 15px; background: white; color: var(--black); font-family: 'DM Sans', sans-serif; }
+  .btn-primary { width: 100%; background: var(--terracotta); color: white; border: none; border-radius: 10px; padding: 14px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+
+  .p-header { background: var(--black); padding: 16px; color: var(--cream); }
+  .p-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .p-header h2 { font-family: 'Playfair Display', serif; font-size: 18px; }
+  .p-header p { font-size: 11px; color: #aaa; margin-top: 2px; }
+  .avatar-sm { width: 34px; height: 34px; border-radius: 50%; background: var(--terracotta); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: white; flex-shrink: 0; }
+  .session-badge { background: rgba(255,255,255,0.08); border-radius: 8px; padding: 8px 12px; font-size: 11px; color: #bbb; display: flex; align-items: center; gap: 6px; }
+  .session-badge strong { color: var(--sand); }
+
+  /* Reminder badge for home screen */
+  .reminder-banner { background: rgba(226,176,126,0.18); border: 1px solid rgba(226,176,126,0.4); border-radius: 8px; padding: 8px 12px; font-size: 11px; color: var(--sand); display: flex; align-items: center; gap: 7px; margin-bottom: 10px; }
+  .reminder-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--terracotta); flex-shrink: 0; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+  .task-section { padding: 14px; }
+  .sec-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: #888; margin-bottom: 10px; }
+  .task-card { background: white; border-radius: 12px; padding: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); cursor: pointer; }
+  .task-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .task-info { flex: 1; }
+  .task-info h4 { font-size: 13px; font-weight: 600; color: var(--black); }
+  .task-info p { font-size: 11px; color: #888; margin-top: 1px; }
+  .badge { font-size: 9px; font-weight: 600; padding: 3px 7px; border-radius: 5px; white-space: nowrap; }
+  .badge-done { background: #E8F5ED; color: var(--alert-green); }
+  .badge-pend { background: #FEF3E8; color: var(--terracotta); }
+  .chevron { color: #ccc; font-size: 14px; margin-right: auto; }
+  .prog-strip { margin: 0 14px 14px; background: white; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .prog-strip-hdr { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 12px; }
+  .prog-track { background: #F0EBE3; border-radius: 6px; height: 5px; }
+  .prog-fill { background: var(--terracotta); height: 5px; border-radius: 6px; width: 72%; }
+  .prog-note { font-size: 10px; color: #999; margin-top: 5px; }
+
+  .q-header { background: var(--black); padding: 16px; color: var(--cream); }
+  .q-hdr-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .back-btn { font-size: 17px; cursor: pointer; color: #aaa; }
+  .q-hdr-row h3 { font-family: 'Playfair Display', serif; font-size: 15px; }
+  .inner-tabs { display: flex; background: rgba(255,255,255,0.06); border-radius: 8px; padding: 2px; }
+  .inner-tab { flex: 1; text-align: center; padding: 6px 3px; font-size: 10px; color: #aaa; cursor: pointer; border-radius: 6px; }
+  .inner-tab.active { background: var(--terracotta); color: white; font-weight: 600; }
+  .q-body { padding: 18px 16px; }
+  .dots-row { display: flex; gap: 5px; margin-bottom: 4px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: #444; }
+  .dot.done { background: var(--terracotta); }
+  .dot.cur { background: var(--sand); }
+  .q-question { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--black); line-height: 1.4; margin-bottom: 6px; }
+  .q-sub { font-size: 11px; color: #888; margin-bottom: 18px; }
+  .ans-opt { background: white; border: 2px solid var(--border); border-radius: 10px; padding: 11px 13px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; cursor: pointer; direction: rtl; }
+  .ans-opt.selected { border-color: var(--terracotta); background: #FAEEE6; }
+  .ans-emoji { font-size: 18px; width: 24px; text-align: center; }
+  .ans-text { flex: 1; }
+  .ans-text h5 { font-size: 12px; font-weight: 500; }
+  .ans-text p { font-size: 10px; color: #999; }
+  .ans-radio { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #ddd; flex-shrink: 0; }
+  .ans-radio.checked { border-color: var(--terracotta); background: var(--terracotta); }
+  .q-nav { display: flex; gap: 10px; margin-top: 18px; direction: rtl; }
+  .btn-sec { flex: 1; background: transparent; color: var(--black); border: 1.5px solid var(--border); border-radius: 10px; padding: 11px; font-size: 12px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .btn-pri-flex { flex: 2; background: var(--terracotta); color: white; border: none; border-radius: 10px; padding: 11px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+
+  .info-note { background: rgba(130,147,131,0.15); border-radius: 8px; padding: 8px 10px; font-size: 11px; color: #829383; margin-bottom: 12px; display: flex; gap: 6px; }
+  /* Read-only metric tile style */
+  .metric-tile-readonly { background: #f5f5f5; border-radius: 10px; padding: 11px 8px; text-align: center; border: 2px solid #e0e0e0; opacity: 0.7; }
+  .metric-tile-readonly .tile-icon { font-size: 19px; margin-bottom: 3px; }
+  .metric-tile-readonly .tile-lbl { font-size: 11px; font-weight: 600; color: #999; }
+  .metric-tile-readonly .tile-note { font-size: 9px; color: #bbb; margin-top: 2px; }
+  .metric-grid-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  .metric-tile { background: white; border-radius: 10px; padding: 11px 8px; text-align: center; cursor: pointer; border: 2px solid var(--border); }
+  .metric-tile.active { background: var(--terracotta); border-color: var(--terracotta); }
+  .metric-tile .tile-icon { font-size: 19px; margin-bottom: 3px; }
+  .metric-tile .tile-lbl { font-size: 11px; font-weight: 600; color: #666; }
+  .metric-tile.active .tile-lbl { color: white; }
+  .inp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+  .inp-group label { font-size: 10px; color: #888; display: block; margin-bottom: 4px; font-weight: 500; }
+  .inp-group input { width: 100%; background: white; border: 1.5px solid var(--border); border-radius: 8px; padding: 10px 11px; font-size: 14px; font-weight: 700; color: var(--black); font-family: 'DM Sans', sans-serif; text-align: center; }
+  .context-chips { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; }
+  .ctx-chip { padding: 5px 10px; border-radius: 14px; border: 1.5px solid var(--border); background: white; font-size: 10px; color: #666; cursor: pointer; }
+  .ctx-chip.sel { border-color: var(--terracotta); background: #FAEEE6; color: var(--terracotta); }
+
+  .j-header { background: var(--black); padding: 16px; color: var(--cream); }
+  .j-hdr-row { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+  .j-hdr-row h3 { font-family: 'Playfair Display', serif; font-size: 15px; }
+  .j-body { padding: 16px; }
+  .field-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #666; margin-bottom: 8px; }
+  .mood-row { display: flex; gap: 6px; margin-bottom: 18px; }
+  .mood-btn { flex: 1; background: white; border: 2px solid var(--border); border-radius: 10px; padding: 9px 3px; text-align: center; cursor: pointer; }
+  .mood-btn.sel { border-color: var(--sage); background: #E8EDE8; }
+  .mood-btn .emoji { font-size: 19px; display: block; margin-bottom: 3px; }
+  .mood-btn span:last-child { font-size: 9px; color: #999; }
+  .slider-row { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; }
+  .slider-lbl { font-size: 10px; color: #999; width: 24px; }
+  .slider-track { flex: 1; height: 4px; background: #E5DDD5; border-radius: 4px; position: relative; }
+  .slider-fill { width: 65%; height: 4px; background: var(--terracotta); border-radius: 4px; }
+  .slider-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--terracotta); position: absolute; top: 50%; left: 63%; transform: translate(-50%, -50%); }
+  .sleep-row { display: flex; gap: 6px; margin-bottom: 18px; }
+  .sleep-btn { flex: 1; background: white; border: 2px solid var(--border); border-radius: 10px; padding: 7px 2px; text-align: center; cursor: pointer; }
+  .sleep-btn.sel { border-color: var(--terracotta); background: #FAEEE6; }
+  .sleep-btn .emoji { font-size: 17px; display: block; margin-bottom: 2px; }
+  .sleep-btn span:last-child { font-size: 8px; color: #999; }
+  .txt-area-mock { width: 100%; background: white; border: 1.5px solid var(--border); border-radius: 10px; padding: 11px 12px; font-size: 12px; color: var(--black); min-height: 80px; line-height: 1.6; font-family: 'DM Sans', sans-serif; margin-bottom: 4px; }
+  .char-count { font-size: 10px; color: #bbb; margin-bottom: 12px; }
+
+  .prog-header { background: var(--black); padding: 16px; color: var(--cream); }
+  .prog-hdr-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .prog-hdr-row h3 { font-family: 'Playfair Display', serif; font-size: 15px; }
+  .metric-summary { display: flex; gap: 8px; }
+  .metric-chip { background: rgba(255,255,255,0.08); border-radius: 8px; padding: 8px 10px; flex: 1; text-align: center; }
+  .metric-chip .val { font-size: 17px; font-weight: 700; color: var(--sand); }
+  .metric-chip .lbl { font-size: 9px; color: #888; margin-top: 1px; }
+  .metric-chip .trend { font-size: 10px; margin-top: 3px; }
+  .trend-up { color: #4F9D69; }
+  .trend-dn { color: #D94F4F; }
+  .chart-section { padding: 14px; }
+  .chart-card { background: white; border-radius: 12px; padding: 13px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .chart-hdr { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .chart-hdr h4 { font-size: 12px; font-weight: 600; }
+  .chart-hdr span { font-size: 10px; color: #999; }
+
+  .activity-card { background: white; border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .daily-act-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+
+  .goal-card { background: white; border-radius: 12px; padding: 13px 14px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .goal-card.goal-done { background: #f9f9f9; opacity: 0.75; }
+  .goal-row { display: flex; align-items: flex-start; gap: 11px; direction: rtl; }
+  .goal-check { width: 22px; height: 22px; border: 2px solid var(--terracotta); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; flex-shrink: 0; margin-top: 1px; color: var(--terracotta); transition: all 0.2s; }
+  .goal-check:hover { background: #FAEEE6; }
+  .goal-check.checked { background: var(--terracotta); color: white; }
+  .goal-check-done { width: 22px; height: 22px; background: var(--alert-green); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: white; flex-shrink: 0; margin-top: 1px; }
+  .goal-body { flex: 1; }
+  .goal-title { font-size: 13px; font-weight: 500; color: var(--black); line-height: 1.4; margin-bottom: 4px; }
+  .goal-meta { font-size: 10px; color: #999; margin-bottom: 7px; }
+  .goal-source { font-size: 9px; font-weight: 600; color: var(--terracotta); background: #FAEEE6; padding: 2px 7px; border-radius: 4px; display: inline-block; margin-bottom: 6px; }
+  .goal-progress-bar { background: #F0EBE3; border-radius: 4px; height: 5px; }
+  .goal-progress-fill { background: var(--terracotta); height: 5px; border-radius: 4px; }
+  .act-hdr { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .act-title { font-size: 12px; font-weight: 600; color: var(--black); }
+  .act-date { font-size: 10px; color: #888; margin-top: 1px; }
+  .act-rating { display: flex; gap: 5px; margin-bottom: 8px; flex-wrap: wrap; }
+  .act-btn { padding: 5px 8px; border-radius: 7px; border: 1.5px solid var(--border); background: white; font-size: 11px; cursor: pointer; }
+  .act-btn.sel-t { border-color: var(--terracotta); background: #FAEEE6; color: var(--terracotta); font-weight: 600; }
+  .act-btn.sel-s { border-color: var(--sage); background: #E8EDE8; color: var(--sage); font-weight: 600; }
+  .act-note { width: 100%; background: var(--cream); border: 1.5px solid var(--border); border-radius: 7px; padding: 8px 10px; font-size: 11px; font-family: 'DM Sans', sans-serif; color: var(--black); min-height: 42px; resize: none; direction: rtl; }
+  .act-save { margin-top: 6px; width: 100%; background: var(--terracotta); color: white; border: none; border-radius: 7px; padding: 8px; font-size: 11px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .upcoming-card { background: white; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1.5px dashed var(--border); }
+
+  /* Therapist */
+  .t-layout { display: flex; height: 620px; }
+  .t-sidebar { width: 185px; background: var(--black); padding: 16px 0; display: flex; flex-direction: column; flex-shrink: 0; }
+  .t-logo { font-family: 'Playfair Display', serif; font-size: 13px; color: var(--cream); padding: 0 16px 14px; border-bottom: 1px solid #333; margin-bottom: 12px; }
+  .t-logo span { color: var(--terracotta); }
+  .t-nav { padding: 9px 16px; color: #888; font-size: 12px; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+  .t-nav:hover { background: rgba(255,255,255,0.04); color: var(--cream); }
+  .t-nav.active { color: var(--cream); background: rgba(198,127,85,0.15); border-right: 2px solid var(--terracotta); }
+  .t-bottom { margin-top: auto; padding: 12px 16px; border-top: 1px solid #333; display: flex; align-items: center; gap: 8px; }
+  .t-user-av { width: 26px; height: 26px; border-radius: 50%; background: var(--sage); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; color: white; flex-shrink: 0; }
+  .t-main { flex: 1; overflow-y: auto; background: var(--cream); }
+  .t-main-hdr { background: white; padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .t-main-hdr h2 { font-family: 'Playfair Display', serif; font-size: 18px; }
+  .t-main-hdr p { font-size: 11px; color: #888; margin-top: 2px; }
+  .search-bar { display: flex; align-items: center; gap: 6px; background: var(--cream); border: 1.5px solid var(--border); border-radius: 8px; padding: 7px 11px; font-size: 11px; color: #888; width: 170px; }
+  .patient-list { padding: 12px 16px; }
+  .filter-row { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+  .filter-chip { padding: 4px 10px; border-radius: 16px; font-size: 10px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); background: white; color: #666; }
+  .filter-chip.active { background: var(--terracotta); border-color: var(--terracotta); color: white; }
+  .patient-row { background: white; border-radius: 10px; padding: 11px 14px; margin-bottom: 7px; display: flex; align-items: center; gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); cursor: pointer; border-right: 4px solid transparent; direction: rtl; }
+  .patient-row.alert { border-right-color: var(--alert-red); }
+  .patient-row.ok { border-right-color: var(--alert-green); }
+  .patient-row.neutral { border-right-color: #ddd; }
+  .pat-av { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: white; flex-shrink: 0; }
+  .av-t { background: var(--terracotta); }
+  .av-s { background: var(--sage); }
+  .av-sa { background: var(--sand); color: var(--black) !important; }
+  .pat-info { flex: 1; }
+  .pat-info h4 { font-size: 12px; font-weight: 600; color: var(--black); }
+  .pat-info p { font-size: 10px; color: #888; margin-top: 1px; }
+  .pat-metrics { display: flex; gap: 12px; }
+  .pm .v { font-size: 12px; font-weight: 600; color: var(--black); text-align: center; }
+  .pm .l { font-size: 9px; color: #aaa; text-align: center; }
+  .pat-status { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; }
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; }
+  .status-dot.red { background: var(--alert-red); }
+  .status-dot.green { background: var(--alert-green); }
+  .status-dot.grey { background: #ccc; }
+  .pat-status span { font-size: 9px; color: #aaa; }
+
+  .t-det-hdr { background: var(--black); padding: 14px 18px; color: var(--cream); display: flex; align-items: flex-start; gap: 12px; direction: rtl; }
+  .det-av { width: 44px; height: 44px; border-radius: 50%; background: var(--terracotta); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: white; flex-shrink: 0; }
+  .det-info h2 { font-family: 'Playfair Display', serif; font-size: 17px; }
+  .det-info p { font-size: 11px; color: #aaa; margin-top: 2px; }
+  .det-badges { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .det-badge { font-size: 10px; padding: 3px 8px; border-radius: 6px; background: rgba(255,255,255,0.08); color: #ccc; }
+  .det-badge.alert { background: rgba(217,79,79,0.2); color: #F08080; }
+  .det-badge.metric-due { background: rgba(226,176,126,0.25); color: var(--sand); }
+  .det-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+  .act-btn-sm { font-size: 10px; padding: 5px 10px; border-radius: 7px; border: 1px solid #444; background: transparent; color: #ccc; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .det-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px 16px; }
+  .det-card { background: white; border-radius: 10px; padding: 13px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+  .det-card h5 { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #888; margin-bottom: 10px; }
+  .det-card.full { grid-column: span 2; }
+  .metric-g { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .metric-itm { text-align: center; background: var(--cream); border-radius: 8px; padding: 10px; }
+  .metric-itm .mv { font-size: 19px; font-weight: 700; color: var(--black); }
+  .metric-itm .mu { font-size: 10px; color: #888; }
+  .metric-itm .ml { font-size: 10px; color: #666; margin-top: 2px; }
+  .metric-itm .mtr { font-size: 9px; margin-top: 2px; }
+  /* Overdue metric indicator */
+  .metric-itm.overdue { border: 1.5px solid rgba(226,176,126,0.6); }
+  .metric-itm.overdue .mu::after { content: " · ⚠️ נדרשת מדידה"; font-size: 8px; color: var(--sand); }
+  .alert-box { background: #FEF2F2; border: 1px solid #FCA5A5; border-radius: 8px; padding: 10px 11px; margin-bottom: 8px; font-size: 11px; color: #991B1B; display: flex; align-items: center; gap: 6px; }
+  .journal-entry { border-bottom: 1px solid var(--border); padding: 8px 0; font-size: 11px; line-height: 1.5; direction: rtl; }
+  .journal-entry:last-child { border-bottom: none; }
+  .jdate { font-size: 9px; font-weight: 600; color: var(--sage); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+  .qpl-card { background: #F5F0FC; border-radius: 8px; padding: 10px 12px; margin-bottom: 6px; font-size: 11px; color: var(--black); line-height: 1.6; direction: rtl; }
+
+  .metric-tabs { background: white; border-bottom: 1px solid var(--border); padding: 10px 16px; display: flex; gap: 6px; align-items: center; }
+  .metric-tab-btn { padding: 5px 11px; border-radius: 14px; border: 1.5px solid var(--border); background: white; color: #666; font-size: 11px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .metric-tab-btn.active { background: var(--terracotta); border-color: var(--terracotta); color: white; font-weight: 600; }
+  .form-panel { padding: 14px 16px; overflow-y: auto; }
+  .form-grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .form-grid4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .form-group label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; font-weight: 500; }
+  .form-group input, .form-group select { width: 100%; border: 1.5px solid var(--border); border-radius: 8px; padding: 9px 11px; font-size: 14px; font-weight: 700; color: var(--black); font-family: 'DM Sans', sans-serif; background: var(--cream); }
+  .form-group select { font-size: 12px; font-weight: 400; }
+  .form-trend { font-size: 10px; margin-top: 3px; }
+  .form-note-area { width: 100%; border: 1.5px solid var(--border); border-radius: 8px; padding: 10px 11px; font-size: 12px; font-family: 'DM Sans', sans-serif; color: var(--black); min-height: 60px; resize: none; margin-bottom: 12px; direction: rtl; }
+  .form-btns { display: flex; gap: 8px; }
+  .btn-save { background: var(--terracotta); color: white; border: none; border-radius: 8px; padding: 10px 18px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .btn-cancel { background: transparent; border: 1.5px solid var(--border); color: #666; border-radius: 8px; padding: 10px 14px; font-size: 11px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .bia-warn { background: #FEF9F0; border: 1.5px solid var(--sand); border-radius: 8px; padding: 10px 12px; font-size: 11px; color: #7a5a20; margin-bottom: 12px; }
+  .proe-note { background: #F0F5F0; border: 1.5px solid var(--sage); border-radius: 8px; padding: 10px 12px; font-size: 11px; color: #3a5c3a; margin-bottom: 12px; }
+  /* Frequency reminder note in therapist forms */
+  .freq-note { font-size: 10px; color: #aaa; font-style: italic; margin-bottom: 10px; display: flex; align-items: center; gap: 4px; }
+  /* Goal add panel */
+  .goal-add-panel { background: var(--cream); border: 1.5px solid var(--border); border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="nav-logo">PT<span>Track</span></div>
+  <div class="nav-sep"></div>
+  <div class="nav-label">Ichilov — אב טיפוס v3.1</div>
+  <div class="nav-sep"></div>
+  <div class="tabs" id="tabs">
+    <button class="tab active" data-screen="login" data-device="mobile">P1 כניסה</button>
+    <button class="tab" data-screen="home" data-device="mobile">P2 דף הבית</button>
+    <button class="tab" data-screen="journal" data-device="mobile">P3 יומן</button>
+    <button class="tab" data-screen="activity" data-device="mobile">P4 פעילויות</button>
+    <button class="tab" data-screen="checkin" data-device="mobile">P5 שאלון</button>
+    <button class="tab" data-screen="logmetrics" data-device="mobile">P5b מדדים</button>
+    <button class="tab" data-screen="goals" data-device="mobile">P6 יעדים</button>
+    <button class="tab" data-screen="tlist" data-device="desktop">T1 רשימת מטופלים</button>
+    <button class="tab" data-screen="tdetail" data-device="desktop">T2 פרופיל מטופל</button>
+    <button class="tab" data-screen="tlog" data-device="desktop">T3 תיעוד מדדים</button>
+  </div>
+</div>
+
+<div class="stage" id="stage">
+
+  <!-- MOBILE FRAME -->
+  <div class="mobile-frame" id="mobileFrame">
+    <div class="notch"></div>
+
+    <!-- P1 Login -->
+    <div id="s-login" class="p-screen">
+      <div class="p-login">
+        <div class="logo-mark">P</div>
+        <div>
+          <!-- Change 1: "ברוכה הבאה" (no "מסע ההחלמה") -->
+          <h1>ברוכה הבאה</h1>
+          <p style="margin-top:7px;font-size:13px;color:#666;">הכניסי את קוד הגישה שקיבלת מהפיזיותרפיסט שלך כדי להתחיל.</p>
+        </div>
+        <div class="input-group">
+          <label>קוד גישה</label>
+          <div class="input-mock">123456</div>
+        </div>
+        <button class="btn-primary">המשך ←</button>
+        <p style="font-size:11px;color:#999;">בעיה? פני לפיזיותרפיסט שלך לקבלת הקוד.</p>
+        <p style="font-size:10px;color:#bbb;">המידע שלך פרטי ונראה רק לפיזיותרפיסט.</p>
+      </div>
+    </div>
+
+    <!-- P2 Home Dashboard — Change 5: reordered cards, removed "ההתקדמות שלי", added reminder banner -->
+    <div id="s-home" class="p-screen" style="display:none;">
+      <div class="p-header">
+        <div class="p-header-row">
+          <div class="avatar-sm">שק</div>
+          <div style="flex:1;margin-right:10px;">
+            <h2>בוקר טוב, שרה ☀️</h2>
+            <p>ראשון, 8 במרץ · שבוע 6 בתוכנית</p>
+          </div>
+        </div>
+        <div class="session-badge">📅 המפגש הבא: <strong>מחר, 14:00</strong> — ד"ר כהן</div>
+      </div>
+      <div class="task-section">
+        <!-- Change 8: Reminder banner (static/visual) -->
+        <div class="reminder-banner">
+          <div class="reminder-dot"></div>
+          יש לך משימות פתוחות להיום — מומלץ למלא לפני 21:00
+        </div>
+        <div class="sec-label">משימות להיום</div>
+        <!-- Change 5: New order — בוקר טוב first, then יומן, then פעילויות, then מדדים, then שאלות -->
+        <!-- Change 1: "שאלון בוקר" → "בוקר טוב" -->
+        <div class="task-card"><div class="task-icon" style="background:#FAEEE6;">⚡</div><div class="task-info"><h4>בוקר טוב — רמת אנרגיה</h4><p>2 דקות · שאלון האנרגיה היומי</p></div><span class="badge badge-done">הושלם</span></div>
+        <div class="task-card"><div class="task-icon" style="background:#E8EDE8;">📝</div><div class="task-info"><h4>יומן יומי</h4><p>3 דקות · ספרי לנו איך את מרגישה</p></div><span class="badge badge-pend">ממתין</span></div>
+        <div class="task-card"><div class="task-icon" style="background:#E8EDE8;">🗓️</div><div class="task-info"><h4>תיעוד פעילויות</h4><p>מפגש PT קבוצתי 6.3 — דרגי</p></div><span class="badge badge-pend">ממתין</span></div>
+        <div class="task-card"><div class="task-icon" style="background:#FAEEE6;">💪</div><div class="task-info"><h4>מדדים</h4><p>מאמץ בפעילות — דיווח עצמי</p></div><span class="badge badge-pend">ממתין</span></div>
+        <div class="task-card"><div class="task-icon" style="background:#EEE8F8;">💬</div><div class="task-info"><h4>שאלות לפיזיותרפיסט</h4><p>רשמי משהו לפני המפגש</p></div><span class="chevron">‹</span></div>
+      </div>
+      <div class="prog-strip">
+        <div class="prog-strip-hdr"><span>השלמת השבוע</span><a style="font-size:10px;color:var(--terracotta);cursor:pointer;">הצג הכל ←</a></div>
+        <div class="prog-track"><div class="prog-fill"></div></div>
+        <div class="prog-note">5 מתוך 7 ימים הושלמו · כל הכבוד! 🎉</div>
+      </div>
+    </div>
+
+    <!-- P5 Check-in — Change 4: VAS-F energy scale replaces pain scale -->
+    <div id="s-checkin" class="p-screen" style="display:none;">
+      <div class="q-header">
+        <div class="q-hdr-row"><span class="back-btn">←</span><h3>הפעילויות שלי</h3></div>
+        <div class="inner-tabs">
+          <div class="inner-tab active">⚡ שאלון</div>
+          <div class="inner-tab" onclick="switchTab('logmetrics')">💪 מדדים</div>
+          <div class="inner-tab" onclick="switchTab('activity')">🗓️ פעילויות</div>
+        </div>
+      </div>
+      <div class="q-body">
+        <div class="dots-row"><div class="dot done"></div><div class="dot cur"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+        <div style="font-size:10px;color:#888;margin-bottom:14px;">שאלה 2 מתוך 5 · עוד כ-2 דקות</div>
+        <!-- Change 4: VAS-F Energy question replaces pain question -->
+        <!-- Change 1: "רמת אנרגיה" terminology -->
+        <div class="q-question">כמה אנרגטי/ת את/ה מרגיש/ה ברגע זה ממש?</div>
+        <div class="q-sub">בחרי את האפשרות שמתארת בצורה הטובה ביותר את רמת האנרגיה שלך כעת</div>
+        <!-- VAS-F 5-level scale per spec -->
+        <div class="ans-opt"><span class="ans-emoji">⚡</span><div class="ans-text"><h5>שיא האנרגיה (10)</h5><p>מרגיש/ה שאני יכול/ה לרוץ מרתון או לפתור בעיה סבוכה</p></div><div class="ans-radio"></div></div>
+        <div class="ans-opt selected"><span class="ans-emoji">😊</span><div class="ans-text"><h5>אנרגיה טובה (7–9)</h5><p>ערני/ת, ממוקד/ת, פרודוקטיבי/ת</p></div><div class="ans-radio checked"></div></div>
+        <div class="ans-opt"><span class="ans-emoji">😐</span><div class="ans-text"><h5>"סוחב/ת" (4–6)</h5><p>תפקוד רגיל, אבל נדרש מאמץ כדי להישאר מרוכז/ת</p></div><div class="ans-radio"></div></div>
+        <div class="ans-opt"><span class="ans-emoji">😔</span><div class="ans-text"><h5>עייפות ניכרת (2–3)</h5><p>צורך חזק למנוחה, קושי בריכוז</p></div><div class="ans-radio"></div></div>
+        <div class="ans-opt"><span class="ans-emoji">😴</span><div class="ans-text"><h5>תשישות מוחלטת (1)</h5><p>חוסר יכולת לתפקד, צורך מיידי לישון</p></div><div class="ans-radio"></div></div>
+        <div class="q-nav"><button class="btn-sec">← חזרה</button><button class="btn-pri-flex">הבא →</button></div>
+      </div>
+    </div>
+
+    <!-- P5b Log Metrics — Change 3: grip/STS are read-only for patient, only RPE is self-reportable -->
+    <div id="s-logmetrics" class="p-screen" style="display:none;">
+      <div class="q-header">
+        <div class="q-hdr-row"><span class="back-btn">←</span><h3>הפעילויות שלי</h3></div>
+        <div class="inner-tabs">
+          <div class="inner-tab" onclick="switchTab('checkin')">⚡ שאלון</div>
+          <div class="inner-tab active">💪 מדדים</div>
+          <div class="inner-tab" onclick="switchTab('activity')">🗓️ פעילויות</div>
+        </div>
+      </div>
+      <div style="padding:13px 14px;overflow-y:auto;">
+        <div class="info-note">ℹ️ <span>מדדים קליניים (אחיזה, קום-שב, BIA) נמדדים על ידי הפיזיותרפיסט. כאן תוכלי לדווח על תחושת המאמץ שלך בעצמך.</span></div>
+
+        <!-- Only 1 patient-self-reportable tile: RPE -->
+        <div class="sec-label" style="margin-bottom:10px;">מה תרצי לדווח?</div>
+        <div class="metric-grid-pick">
+          <!-- Active tile: RPE only -->
+          <div class="metric-tile active" id="ptile-proe" onclick="switchPatMetric('proe')"><div class="tile-icon">📋</div><div class="tile-lbl">מאמץ בפעילות</div></div>
+          <!-- Change 3: grip and STS — read-only tiles with note -->
+          <div class="metric-tile-readonly"><div class="tile-icon">💪</div><div class="tile-lbl">כוח אחיזה</div><div class="tile-note">נמדד ע"י הפיזיותרפיסט</div></div>
+          <div class="metric-tile-readonly"><div class="tile-icon">🪑</div><div class="tile-lbl">קום-שב</div><div class="tile-note">נמדד ע"י הפיזיותרפיסט</div></div>
+          <!-- Change 2/3: BIA/מסת שריר — therapist-only, read-only -->
+          <div class="metric-tile-readonly"><div class="tile-icon">📊</div><div class="tile-lbl">מסת שריר</div><div class="tile-note">נמדד ע"י הפיזיותרפיסט</div></div>
+        </div>
+
+        <!-- Only RPE form shown -->
+        <div id="pmf-proe">
+          <div style="font-size:12px;font-weight:600;color:var(--black);margin-bottom:10px;">📋 כמה קשה הרגישה הפעילות?</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px;">
+            <div style="padding:10px;border-radius:10px;border:2px solid var(--border);background:white;text-align:center;cursor:pointer;"><div style="font-size:20px;">😴</div><div style="font-size:10px;color:#888;margin-top:3px;">קל מאוד</div></div>
+            <div style="padding:10px;border-radius:10px;border:2px solid var(--border);background:white;text-align:center;cursor:pointer;"><div style="font-size:20px;">🙂</div><div style="font-size:10px;color:#888;margin-top:3px;">קל</div></div>
+            <div style="padding:10px;border-radius:10px;border:2px solid var(--terracotta);background:#FAEEE6;text-align:center;cursor:pointer;"><div style="font-size:20px;">😐</div><div style="font-size:10px;color:var(--terracotta);margin-top:3px;font-weight:600;">בינוני</div></div>
+            <div style="padding:10px;border-radius:10px;border:2px solid var(--border);background:white;text-align:center;cursor:pointer;"><div style="font-size:20px;">😟</div><div style="font-size:10px;color:#888;margin-top:3px;">קשה</div></div>
+            <div style="padding:10px;border-radius:10px;border:2px solid var(--border);background:white;text-align:center;cursor:pointer;grid-column:span 2;"><div style="font-size:20px;">😰</div><div style="font-size:10px;color:#888;margin-top:3px;">קשה מאוד / מתיש</div></div>
+          </div>
+          <button class="btn-primary" style="font-size:12px;padding:11px;">שמור · 🕐 <span style="font-weight:400;opacity:0.8;">09:32, 8.3</span></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- P4 Activity -->
+    <div id="s-activity" class="p-screen" style="display:none;">
+      <div class="q-header">
+        <div class="q-hdr-row"><span class="back-btn">←</span><h3>הפעילויות שלי</h3></div>
+        <div class="inner-tabs">
+          <div class="inner-tab" onclick="switchTab('checkin')">⚡ שאלון</div>
+          <div class="inner-tab" onclick="switchTab('logmetrics')">💪 מדדים</div>
+          <div class="inner-tab active">🗓️ פעילויות</div>
+        </div>
+      </div>
+      <div style="padding:12px 14px;overflow-y:auto;">
+        <div class="sec-label">פעילויות אחרונות</div>
+        <div class="activity-card">
+          <div class="act-hdr"><div><div class="act-title">🏃 מפגש PT קבוצתי</div><div class="act-date">6.3, 10:00 · חדר כושר 3, איכילוב</div></div><span class="badge badge-done">השתתפתי</span></div>
+          <div style="font-size:10px;color:#888;margin-bottom:5px;font-weight:500;">איך הרגיש המפגש?</div>
+          <div class="act-rating"><div class="act-btn">😔 קשה</div><div class="act-btn sel-t">😐 בסדר</div><div class="act-btn">😊 טוב</div><div class="act-btn">🌟 מעולה</div></div>
+          <textarea class="act-note">תרגילי האיזון היו מאתגרים אבל הצלחתי את כל 3 הסבבים.</textarea>
+          <button class="act-save">שמור משוב ✓</button>
+        </div>
+        <div class="activity-card">
+          <div class="act-hdr"><div><div class="act-title">☕ מפגש חברתי</div><div class="act-date">5.3, 15:00 · בית קהילה</div></div><span class="badge badge-done">השתתפתי</span></div>
+          <div style="font-size:10px;color:#888;margin-bottom:5px;font-weight:500;">איך הרגשת שם?</div>
+          <div class="act-rating"><div class="act-btn">😔 מנוקז</div><div class="act-btn">😐 ניטרלי</div><div class="act-btn sel-s">😊 טוב</div><div class="act-btn">🌟 מרומם</div></div>
+          <textarea class="act-note">היה נחמד לפגוש את האחרים. הרגשתי יותר אנרגטית אחרי.</textarea>
+          <button class="act-save">שמור משוב ✓</button>
+        </div>
+        <div class="sec-label" style="margin-top:12px;margin-bottom:7px;">עתידיות</div>
+        <div class="upcoming-card">
+          <div class="act-hdr"><div><div class="act-title">🏊 טיפול בבריכה</div><div class="act-date">11.3, 11:00 · בריכה, קומה B</div></div><span class="badge badge-pend">מתוכנן</span></div>
+          <div style="font-size:11px;color:#aaa;margin-top:6px;">משוב יהיה זמין אחרי המפגש</div>
+        </div>
+        <!-- Daily life activities -->
+        <div class="sec-label" style="margin-top:16px;margin-bottom:7px;">פעילות יומיומית</div>
+        <div style="background:white;border-radius:12px;padding:12px 14px;box-shadow:0 1px 3px rgba(0,0,0,0.06);margin-bottom:8px;">
+          <div style="font-size:11px;color:#888;margin-bottom:10px;">תעדי פעילויות שעשית מחוץ לתוכנית הטיפול — הפיזיותרפיסט יוכל לראות זאת</div>
+          <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center;">
+            <select id="dailyActivitySelect" style="flex:1;background:white;border:1.5px solid var(--border);border-radius:9px;padding:10px 11px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--black);direction:rtl;">
+              <option value="">בחרי פעילות...</option>
+              <option value="🛒|קניות">🛒 קניות</option>
+              <option value="🧘|פילאטיס">🧘 פילאטיס</option>
+              <option value="🍳|לבשל">🍳 לבשל</option>
+              <option value="👶|שמירה על הנכדים">👶 שמירה על הנכדים</option>
+              <option value="🧹|ניקיון בית">🧹 ניקיון בית</option>
+              <option value="🚶|טיול קצר">🚶 טיול קצר</option>
+              <option value="🏊|שחייה">🏊 שחייה</option>
+              <option value="⚽|ספורט">⚽ ספורט</option>
+              <option value="🪜|עליית מדרגות">🪜 עליית מדרגות</option>
+              <option value="☕|פגישה עם חברים">☕ פגישה עם חברים</option>
+              <option value="👨‍👩‍👧|מפגש משפחתי">👨‍👩‍👧 מפגש משפחתי</option>
+              <option value="📚|קריאת ספר">📚 קריאת ספר</option>
+              <option value="📺|צפייה בטלוויזיה">📺 צפייה בטלוויזיה</option>
+            </select>
+            <button onclick="addDailyActivity()" style="background:var(--terracotta);color:white;border:none;border-radius:9px;padding:10px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;">+ הוסף</button>
+          </div>
+          <div id="dailyActivityLog">
+            <div class="daily-act-item">
+              <span style="font-size:14px;">🛒</span>
+              <div style="flex:1;"><div style="font-size:12px;font-weight:500;color:var(--black);">קניות</div><div style="font-size:10px;color:#999;">היום, 10:15</div></div>
+              <span style="font-size:10px;color:var(--alert-green);font-weight:600;">✓ נרשם</span>
+            </div>
+            <div class="daily-act-item" style="border-bottom:none;">
+              <span style="font-size:14px;">👨‍👩‍👧</span>
+              <div style="flex:1;"><div style="font-size:12px;font-weight:500;color:var(--black);">מפגש משפחתי</div><div style="font-size:10px;color:#999;">אתמול, 18:00</div></div>
+              <span style="font-size:10px;color:var(--alert-green);font-weight:600;">✓ נרשם</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- P3 Journal — Change 7: sleep tracking added; change 1: no "החלמה" -->
+    <div id="s-journal" class="p-screen" style="display:none;">
+      <div class="j-header">
+        <div class="j-hdr-row"><span class="back-btn">←</span><h3>יומן יומי</h3></div>
+        <div style="font-size:10px;color:#888;">ראשון, 8 במרץ · לוקח כ-3 דקות</div>
+      </div>
+      <div class="j-body">
+        <div class="field-label">מצב רוח כללי היום</div>
+        <div class="mood-row">
+          <div class="mood-btn"><span class="emoji">😔</span><span>נמוך</span></div>
+          <div class="mood-btn sel"><span class="emoji">😐</span><span>בסדר</span></div>
+          <div class="mood-btn"><span class="emoji">🙂</span><span>טוב</span></div>
+          <div class="mood-btn"><span class="emoji">😄</span><span>מעולה</span></div>
+        </div>
+        <!-- Change 1: "רמת אנרגיה" label kept -->
+        <div class="field-label">רמת אנרגיה</div>
+        <div class="slider-row">
+          <span class="slider-lbl">נמוכה</span>
+          <div class="slider-track"><div class="slider-fill"></div><div class="slider-thumb"></div></div>
+          <span class="slider-lbl" style="text-align:left;">גבוהה</span>
+        </div>
+        <!-- Change 7: Sleep tracking — new field after energy slider -->
+        <div class="field-label">🌙 שינה — אמש</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <span style="font-size:10px;color:#999;white-space:nowrap;">שעות שינה</span>
+          <div style="display:flex;align-items:center;gap:6px;flex:1;">
+            <span style="font-size:12px;color:#888;">4</span>
+            <div style="flex:1;height:4px;background:#E5DDD5;border-radius:4px;position:relative;">
+              <div style="width:60%;height:4px;background:var(--sage);border-radius:4px;"></div>
+              <div style="width:14px;height:14px;border-radius:50%;background:var(--sage);position:absolute;top:50%;left:58%;transform:translate(-50%,-50%);"></div>
+            </div>
+            <span style="font-size:12px;color:#888;">10</span>
+          </div>
+          <span style="font-size:13px;font-weight:700;color:var(--black);min-width:26px;text-align:center;">7h</span>
+        </div>
+        <div class="field-label" style="margin-top:0;">איכות השינה</div>
+        <div class="sleep-row" style="margin-bottom:18px;">
+          <div class="sleep-btn"><span class="emoji">😴</span><span>גרוע</span></div>
+          <div class="sleep-btn"><span class="emoji">😐</span><span>בסדר</span></div>
+          <div class="sleep-btn sel"><span class="emoji">😊</span><span>טוב</span></div>
+          <div class="sleep-btn"><span class="emoji">⭐</span><span>מצוין</span></div>
+        </div>
+        <div class="field-label">משהו לשתף עם הפיזיותרפיסט?</div>
+        <div class="txt-area-mock">הרגשתי חזקה יותר בהליכה היום. המדרגות היו קצת יותר קלות מהשבוע שעבר, אם כי נעשיתי עייפה יותר מוקדם בצהריים.</div>
+        <div class="char-count">נותרו 102 תווים</div>
+        <button class="btn-primary" style="margin-bottom:14px;">שמור רשומה ✓</button>
+        <div class="field-label">💬 שאלות לפיזיותרפיסט שלי</div>
+        <div class="txt-area-mock" style="min-height:54px;color:#aaa;font-style:italic;">למשל: "האם זה נורמלי שהיד שלי מרגישה חסרת תחושה אחרי תרגילי האחיזה?"</div>
+        <div style="font-size:10px;color:#bbb;margin-top:4px;">אופציונלי — הפיזיותרפיסט יראה את זה לפני המפגש הבא</div>
+      </div>
+    </div>
+
+    <!-- P6 Goals — Change 6: activity bank chips, "הוגדר עם הפיזיותרפיסט" label, patient can add own goals -->
+    <div id="s-goals" class="p-screen" style="display:none;">
+      <div class="prog-header">
+        <!-- Change 1: "יעדים שלי" no "החלמה" references -->
+        <div class="prog-hdr-row"><span class="back-btn">←</span><h3>היעדים שלי</h3></div>
+        <div class="metric-summary">
+          <div class="metric-chip"><div class="val">3</div><div class="lbl">יעדים פעילים</div><div class="trend" style="color:#aaa;">—</div></div>
+          <div class="metric-chip"><div class="val">2</div><div class="lbl">הושלמו</div><div class="trend trend-up">↑ החודש</div></div>
+        </div>
+      </div>
+      <div class="chart-section">
+        <!-- Active goals list — populated by the add panel below -->
+        <div id="activeGoalsList"></div>
+
+        <!-- Goal add panel: 3 structured dropdowns -->
+        <div class="sec-label" style="margin-bottom:10px;">הוספת יעד חדש</div>
+        <div class="goal-add-panel">
+          <div style="font-size:11px;font-weight:600;color:#555;margin-bottom:10px;">+ הוספי יעד חדש</div>
+
+          <div style="font-size:10px;color:#666;font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.4px;">פעילות</div>
+          <select id="goalActivity" style="width:100%;background:white;border:1.5px solid var(--border);border-radius:9px;padding:10px 12px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--black);direction:rtl;margin-bottom:10px;">
+            <option value="">בחרי פעילות...</option>
+            <option>לעלות מדרגות</option>
+            <option>לפגוש חברים</option>
+            <option>פילאטיס</option>
+            <option>להוציא את הכלב</option>
+            <option>יוגה</option>
+            <option>חדר כושר</option>
+            <option>ריצה</option>
+            <option>הליכה</option>
+            <option>שחייה</option>
+            <option>ריקוד</option>
+            <option>רכיבה על אופניים</option>
+            <option>משחקי כדור</option>
+            <option>ללכת לקניות</option>
+            <option>צ׳י קונג</option>
+            <option>להרים את הילד/ה</option>
+            <option>ללכת לים</option>
+            <option>אימון אישי</option>
+            <option>לצאת עם חברים</option>
+          </select>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+            <div>
+              <div style="font-size:10px;color:#666;font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.4px;">כמות</div>
+              <select id="goalAmount" style="width:100%;background:white;border:1.5px solid var(--border);border-radius:9px;padding:10px 12px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--black);direction:rtl;">
+                <option value="">בחרי...</option>
+                <option>1</option><option>2</option><option>3</option><option>4</option>
+                <option>5</option><option>6</option><option>7</option><option>8</option>
+                <option>9</option><option>10</option><option>15</option><option>20</option>
+                <option>30</option>
+              </select>
+            </div>
+            <div>
+              <div style="font-size:10px;color:#666;font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.4px;">תדירות</div>
+              <select id="goalFreq" style="width:100%;background:white;border:1.5px solid var(--border);border-radius:9px;padding:10px 12px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--black);direction:rtl;">
+                <option value="">בחרי...</option>
+                <option>ביום</option>
+                <option>בשבוע</option>
+                <option>בחודש</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Live preview of the goal text -->
+          <div id="goalPreview" style="display:none;background:#FAEEE6;border:1.5px solid var(--terracotta);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--black);margin-bottom:10px;direction:rtl;"></div>
+
+          <button onclick="addPatientGoal()" style="width:100%;background:var(--terracotta);color:white;border:none;border-radius:9px;padding:11px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">+ הוספי יעד</button>
+        </div>
+
+        <!-- Completed goals -->
+        <div class="sec-label" style="margin-top:16px;margin-bottom:10px;">הושלמו ✓</div>
+
+        <div class="goal-card goal-done" id="goal4">
+          <div class="goal-row">
+            <div class="goal-check-done">✓</div>
+            <div class="goal-body">
+              <div class="goal-title" style="text-decoration:line-through;color:#aaa;">להגיע לפגישות PT 3 פעמים בשבוע</div>
+              <div class="goal-meta">הושלם · 20.2.2026</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="goal-card goal-done" id="goal5">
+          <div class="goal-row">
+            <div class="goal-check-done">✓</div>
+            <div class="goal-body">
+              <div class="goal-title" style="text-decoration:line-through;color:#aaa;">לצאת להליכה של 20 דקות פעמיים בשבוע</div>
+              <div class="goal-meta">הושלם · 5.3.2026</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- end mobile-frame -->
+
+  <!-- DESKTOP FRAME -->
+  <div class="desktop-wrap" id="desktopFrame" style="display:none;">
+    <div class="dt-bar">
+      <div class="dt-dot" style="background:#FF5F57;"></div>
+      <div class="dt-dot" style="background:#FFBD2E;"></div>
+      <div class="dt-dot" style="background:#28CA41;"></div>
+      <div class="dt-url"></div>
+    </div>
+
+    <!-- T1 Patient List — Change 8: metric-due indicator added, Change 1: "כאב" column renamed "אנרגיה" -->
+    <div id="s-tlist">
+      <div class="t-layout">
+        <div class="t-sidebar">
+          <div class="t-logo">PT<span>Track</span></div>
+          <div class="t-nav active">👥 המטופלים שלי</div>
+          <div class="t-nav">📊 אנליטיקה</div>
+          <div class="t-nav">📋 שאלונים</div>
+          <div class="t-nav">📅 לוח זמנים</div>
+          <div class="t-nav">⚙️ הגדרות</div>
+          <div class="t-bottom"><div class="t-user-av">דכ</div><div style="font-size:11px;color:#aaa;">ד"ר כהן</div></div>
+        </div>
+        <div class="t-main">
+          <div class="t-main-hdr">
+            <div><h2>המטופלים שלי</h2><p>23 מטופלים פעילים · 3 דורשים תשומת לב</p></div>
+            <div class="search-bar">🔍 חיפוש מטופלים...</div>
+          </div>
+          <div class="patient-list">
+            <div class="filter-row">
+              <div class="filter-chip active">הכל (23)</div>
+              <div class="filter-chip">⚠️ התראות (3)</div>
+              <div class="filter-chip">מפגשים היום (4)</div>
+              <div class="filter-chip">⏰ מדידה נדרשת (2)</div>
+            </div>
+            <div class="patient-row alert">
+              <div class="pat-av av-t">שק</div>
+              <div class="pat-info"><h4>שרה קליין · בת 52</h4><p>סרטן שד · כניסה אחרונה: אתמול 08:15</p></div>
+              <!-- Change 1: "כאב" → "אנרגיה" in patient list metrics -->
+              <div class="pat-metrics"><div class="pm"><div class="v" style="color:var(--alert-green);">7/10</div><div class="l">אנרגיה</div></div><div class="pm"><div class="v" style="color:var(--alert-red);">↓15%</div><div class="l">אחיזה</div></div><div class="pm"><div class="v">90%</div><div class="l">עמידה</div></div></div>
+              <div class="pat-status"><div class="status-dot red"></div><span>דורש תשומת לב</span></div>
+            </div>
+            <div class="patient-row ok">
+              <div class="pat-av av-s">דל</div>
+              <div class="pat-info"><h4>דוד לוי · בן 67</h4><p>סרטן המעי · כניסה אחרונה: היום 09:30</p></div>
+              <div class="pat-metrics"><div class="pm"><div class="v">8/10</div><div class="l">אנרגיה</div></div><div class="pm"><div class="v" style="color:var(--alert-green);">↑8%</div><div class="l">אחיזה</div></div><div class="pm"><div class="v">85%</div><div class="l">עמידה</div></div></div>
+              <div class="pat-status"><div class="status-dot green"></div><span>יציב</span></div>
+            </div>
+            <div class="patient-row neutral" style="border-right-color:var(--sand);">
+              <div class="pat-av av-sa">רב</div>
+              <div class="pat-info"><h4>רחל בן-דוד · בת 45</h4><p>לימפומה · כניסה אחרונה: לפני יומיים</p></div>
+              <div class="pat-metrics"><div class="pm"><div class="v">5/10</div><div class="l">אנרגיה</div></div><div class="pm"><div class="v" style="color:var(--sand);">⏰</div><div class="l">אחיזה</div></div><div class="pm"><div class="v" style="color:var(--terracotta);">60%</div><div class="l">עמידה</div></div></div>
+              <!-- Change 8 / 9: Metric due indicator -->
+              <div class="pat-status"><div class="status-dot" style="background:var(--sand);"></div><span style="color:var(--sand);">מדידה נדרשת</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- T2 Patient Detail — Change 9: overdue metric indicator; Change 1: "כאב" → "אנרגיה" -->
+    <div id="s-tdetail" style="display:none;">
+      <div class="t-layout">
+        <div class="t-sidebar">
+          <div class="t-logo">PT<span>Track</span></div>
+          <div class="t-nav active">👥 המטופלים שלי</div>
+          <div class="t-nav">📊 אנליטיקה</div>
+          <div class="t-nav">📋 שאלונים</div>
+          <div class="t-nav">📅 לוח זמנים</div>
+          <div class="t-nav">⚙️ הגדרות</div>
+          <div class="t-bottom"><div class="t-user-av">דכ</div><div style="font-size:11px;color:#aaa;">ד"ר כהן</div></div>
+        </div>
+        <div style="flex:1;overflow-y:auto;background:var(--cream);">
+          <div class="t-det-hdr">
+            <div class="det-av">שק</div>
+            <div class="det-info">
+              <h2>שרה קליין</h2>
+              <p>בת 52 · סרטן שד · שבוע 6 בתוכנית</p>
+              <div class="det-badges">
+                <span class="det-badge">מפגש הבא: מחר 14:00</span>
+                <span class="det-badge">עמידה: 90%</span>
+                <span class="det-badge alert">⚠️ ירידה בכוח אחיזה</span>
+                <!-- Change 8/9: metric due badge -->
+                <span class="det-badge metric-due">⏰ BIA — נדרשת מדידה (>30 יום)</span>
+              </div>
+              <div class="det-actions">
+                <button class="act-btn-sm" style="background:rgba(198,127,85,0.2);border-color:var(--terracotta);color:var(--sand);" onclick="switchScreen('tlog','desktop')">➕ תעד מדדים</button>
+                <button class="act-btn-sm">📤 ייצא דוח</button>
+                <button class="act-btn-sm">📋 שלח שאלון</button>
+                <button class="act-btn-sm">📝 הוסף הערה</button>
+                <button class="act-btn-sm" onclick="switchScreen('tlist','desktop')">← חזרה לרשימה</button>
+              </div>
+            </div>
+          </div>
+          <div class="det-grid">
+            <div class="det-card full">
+              <h5>⚠️ התראות</h5>
+              <div class="alert-box">⚠️ כוח אחיזה ירד 15% (ימין: 20→17 ק"ג) — לבדוק במפגש</div>
+              <div class="alert-box" style="margin-bottom:0;">📓 היומן מזכיר עייפות מוגברת השבוע (3 רשומות)</div>
+            </div>
+            <div class="det-card">
+              <h5>מדדים קליניים <span style="float:left;font-size:9px;color:var(--terracotta);font-weight:400;text-transform:none;letter-spacing:0;cursor:pointer;" onclick="switchScreen('tlog','desktop')">+ תעד חדש →</span></h5>
+              <div class="metric-g">
+                <div class="metric-itm"><div class="mv">17</div><div class="mu">ק"ג</div><div class="ml">אחיזה (ימין)</div><div class="mtr trend-dn">↓ היה 20</div></div>
+                <div class="metric-itm"><div class="mv">15</div><div class="mu">ק"ג</div><div class="ml">אחיזה (שמאל)</div><div class="mtr" style="color:#aaa;">→ יציב</div></div>
+                <div class="metric-itm"><div class="mv">12</div><div class="mu">חז'</div><div class="ml">קום-שב 30ש'</div><div class="mtr trend-up">↑ +2 חזרות</div></div>
+                <!-- Change 9: overdue indicator on BIA -->
+                <div class="metric-itm overdue"><div class="mv">22.4</div><div class="mu">% שומן</div><div class="ml">BIA</div><div class="mtr" style="color:var(--sand);">⏰ לפני 38 יום</div></div>
+              </div>
+              <div style="margin-top:9px;padding-top:9px;border-top:1px solid var(--border);">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;"><span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:#888;">ציון PROE</span><span style="font-size:10px;color:#999;">אחרון: 25.2</span></div>
+                <div style="display:flex;align-items:baseline;gap:5px;margin-bottom:6px;"><span style="font-size:20px;font-weight:700;color:var(--black);">72</span><span style="font-size:10px;color:var(--alert-green);">↑ מ-65</span></div>
+                <div style="display:flex;gap:5px;">
+                  <div style="flex:1;background:var(--cream);border-radius:5px;padding:4px 6px;font-size:9px;text-align:center;color:#666;">ניידות<br><strong style="font-size:11px;color:var(--black);">24</strong></div>
+                  <div style="flex:1;background:var(--cream);border-radius:5px;padding:4px 6px;font-size:9px;text-align:center;color:#666;">כוח<br><strong style="font-size:11px;color:var(--black);">26</strong></div>
+                  <div style="flex:1;background:var(--cream);border-radius:5px;padding:4px 6px;font-size:9px;text-align:center;color:#666;">עייפות<br><strong style="font-size:11px;color:var(--black);">22</strong></div>
+                </div>
+              </div>
+            </div>
+            <div class="det-card">
+              <!-- Change 1: "כאב" → "אנרגיה" in questionnaire summary -->
+              <h5>שאלון אחרון · VAS-F</h5>
+              <div style="font-size:12px;line-height:2.1;color:#555;direction:rtl;">
+                <div style="display:flex;justify-content:space-between;"><span>רמת אנרגיה</span><strong style="color:var(--alert-green);">7/10 ⚡</strong></div>
+                <div style="display:flex;justify-content:space-between;"><span>עייפות</span><strong style="color:var(--alert-red);">6/10 ↑</strong></div>
+                <div style="display:flex;justify-content:space-between;"><span>איכות שינה</span><strong>5/10</strong></div>
+                <div style="display:flex;justify-content:space-between;"><span>ניידות</span><strong style="color:var(--alert-green);">7/10 ↑</strong></div>
+                <div style="display:flex;justify-content:space-between;"><span>מצב רוח</span><strong>בסדר</strong></div>
+              </div>
+            </div>
+            <div class="det-card full">
+              <h5>רשומות יומן אחרונות</h5>
+              <div class="journal-entry"><div class="jdate">8.3 · היום</div>"הרגשתי חזקה יותר בהליכה. המדרגות היו קצת יותר קלות. נעשיתי עייפה מוקדם יותר בצהריים."</div>
+              <div class="journal-entry"><div class="jdate">7.3 · אתמול</div>"אנרגיה טובה בבוקר, אבל יד ימין מרגישה חלשה יותר כשאני פותחת צנצנות."</div>
+              <div class="journal-entry"><div class="jdate">6.3</div>"שנתי 6 שעות, עייפות עדיין גבוהה. עשיתי את התרגילים כפי שהורו לי."</div>
+            </div>
+            <div class="det-card full" style="border-right:3px solid #9B7FC7;">
+              <h5 style="color:#6B4FA0;">💬 שאלות המטופלת למפגש זה</h5>
+              <div class="qpl-card">"האם זה נורמלי שיד ימין מרגישה חסרת תחושה אחרי תרגילי האחיזה? זה קורה כ-10 דקות אחרי המפגש."</div>
+              <div class="qpl-card">"אפשר לנסות את תרגילי ההליכה בחוץ בפעם הבאה? אני מוצאת את זה יותר מוטיבציוני מאשר ההליכון."</div>
+              <div style="font-size:10px;color:#9B7FC7;margin-top:6px;">הוגש ע"י המטופלת · 7.3 · 2 שאלות</div>
+            </div>
+            <div class="det-card full" style="border-right:3px solid var(--terracotta);">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                <h5 style="color:var(--terracotta);">🎯 יעדי טיפול</h5>
+              </div>
+
+              <!-- Active goals list — populated by add panel below -->
+              <div id="t2ActiveGoalsList"></div>
+
+              <!-- Add goal panel — same 3 dropdowns as patient P6 -->
+              <div id="t2-goal-add-panel" style="background:var(--cream);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;margin-top:4px;">
+                <div style="font-size:11px;font-weight:600;color:#555;margin-bottom:10px;">+ הוספת יעד חדש</div>
+
+                <div style="font-size:10px;color:#666;font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.4px;">פעילות</div>
+                <select id="t2GoalActivity" style="width:100%;background:white;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--black);direction:rtl;margin-bottom:10px;">
+                  <option value="">בחרי פעילות...</option>
+                  <option>לעלות מדרגות</option>
+                  <option>לפגוש חברים</option>
+                  <option>פילאטיס</option>
+                  <option>להוציא את הכלב</option>
+                  <option>יוגה</option>
+                  <option>חדר כושר</option>
+                  <option>ריצה</option>
+                  <option>הליכה</option>
+                  <option>שחייה</option>
+                  <option>ריקוד</option>
+                  <option>רכיבה על אופניים</option>
+                  <option>משחקי כדור</option>
+                  <option>ללכת לקניות</option>
+                  <option>צ׳י קונג</option>
+                  <option>להרים את הילד/ה</option>
+                  <option>ללכת לים</option>
+                  <option>אימון אישי</option>
+                  <option>לצאת עם חברים</option>
+                </select>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+                  <div>
+                    <div style="font-size:10px;color:#666;font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.4px;">כמות</div>
+                    <select id="t2GoalAmount" style="width:100%;background:white;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--black);direction:rtl;">
+                      <option value="">בחרי...</option>
+                      <option>1</option><option>2</option><option>3</option><option>4</option>
+                      <option>5</option><option>6</option><option>7</option><option>8</option>
+                      <option>9</option><option>10</option><option>15</option><option>20</option>
+                      <option>30</option>
+                    </select>
+                  </div>
+                  <div>
+                    <div style="font-size:10px;color:#666;font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.4px;">תדירות</div>
+                    <select id="t2GoalFreq" style="width:100%;background:white;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--black);direction:rtl;">
+                      <option value="">בחרי...</option>
+                      <option>ביום</option>
+                      <option>בשבוע</option>
+                      <option>בחודש</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div id="t2GoalPreview" style="display:none;background:#FAEEE6;border:1.5px solid var(--terracotta);border-radius:7px;padding:8px 10px;font-size:11px;color:var(--black);margin-bottom:10px;direction:rtl;"></div>
+
+                <div style="display:flex;gap:8px;">
+                  <button onclick="addTherapistGoal()" style="flex:1;background:var(--terracotta);color:white;border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">+ הוסף יעד למטופל/ת</button>
+                  <button onclick="document.getElementById('t2-goal-add-panel').style.display='none';" style="background:transparent;border:1.5px solid var(--border);color:#666;border-radius:8px;padding:9px 12px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;">ביטול</button>
+                </div>
+              </div>
+            </div>
+            <div class="det-card full" style="border-right:3px solid var(--sage);">
+              <h5 style="color:var(--sage);">🛒 פעילות יומיומית — שבוע אחרון</h5>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">
+                <div style="background:var(--cream);border-radius:7px;padding:5px 10px;font-size:11px;color:#555;display:flex;align-items:center;gap:5px;"><span>🛒</span> קניות <span style="font-size:10px;color:#999;">· היום</span></div>
+                <div style="background:var(--cream);border-radius:7px;padding:5px 10px;font-size:11px;color:#555;display:flex;align-items:center;gap:5px;"><span>👨‍👩‍👧</span> מפגש משפחתי <span style="font-size:10px;color:#999;">· אתמול</span></div>
+                <div style="background:var(--cream);border-radius:7px;padding:5px 10px;font-size:11px;color:#555;display:flex;align-items:center;gap:5px;"><span>📚</span> קריאת ספר <span style="font-size:10px;color:#999;">· 6.3</span></div>
+                <div style="background:var(--cream);border-radius:7px;padding:5px 10px;font-size:11px;color:#555;display:flex;align-items:center;gap:5px;"><span>🍳</span> בישול <span style="font-size:10px;color:#999;">· 5.3</span></div>
+              </div>
+              <div style="font-size:10px;color:#999;margin-top:8px;">4 פעילויות דווחו השבוע — פעילות יומיומית גבוהה ✓</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- T3 Log Metrics — Change 9: "יש למדוד לפחות אחת לחודש" note on each metric -->
+    <div id="s-tlog" style="display:none;">
+      <div class="t-layout">
+        <div class="t-sidebar">
+          <div class="t-logo">PT<span>Track</span></div>
+          <div class="t-nav active">👥 המטופלים שלי</div>
+          <div class="t-nav">📊 אנליטיקה</div>
+          <div class="t-nav">📋 שאלונים</div>
+          <div class="t-nav">📅 לוח זמנים</div>
+          <div class="t-nav">⚙️ הגדרות</div>
+          <div class="t-bottom"><div class="t-user-av">דכ</div><div style="font-size:11px;color:#aaa;">ד"ר כהן</div></div>
+        </div>
+        <div style="flex:1;overflow-y:auto;background:var(--cream);">
+          <div class="t-det-hdr" style="padding:12px 16px;">
+            <div class="det-av">שק</div>
+            <div class="det-info">
+              <h2>תיעוד מדדים קליניים</h2>
+              <p>שרה קליין · בת 52 · סרטן שד · מפגש: 8.3.2026</p>
+              <div class="det-badges">
+                <span class="det-badge" style="cursor:pointer;" onclick="switchScreen('tdetail','desktop')">← חזרה למטופלת</span>
+                <span class="det-badge">תועד לאחרונה: 25.2</span>
+              </div>
+            </div>
+          </div>
+          <div class="metric-tabs">
+            <span style="font-size:11px;color:#888;font-weight:600;margin-left:8px;">סוג מדד:</span>
+            <button class="metric-tab-btn active" id="ttab-grip" onclick="switchThMetric('grip')">💪 כוח אחיזה</button>
+            <button class="metric-tab-btn" id="ttab-sts" onclick="switchThMetric('sts')">🪑 קום-שב</button>
+            <button class="metric-tab-btn" id="ttab-bia" onclick="switchThMetric('bia')">⚖️ BIA</button>
+            <button class="metric-tab-btn" id="ttab-proe" onclick="switchThMetric('proe')">📋 PROE</button>
+          </div>
+          <div class="form-panel">
+            <div id="tf-grip">
+              <!-- Change 9: frequency reminder note -->
+              <div class="freq-note">⏰ יש למדוד לפחות אחת לחודש · תועד לאחרונה: 25.2 (11 ימים)</div>
+              <div style="font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">💪 כוח אחיזה — דינמומטר Jamar</div>
+              <div class="form-grid3">
+                <div class="form-group"><label>יד ימין (ק"ג)</label><input type="number" value="18"><div class="form-trend trend-up">↑ מ-17 במפגש הקודם</div></div>
+                <div class="form-group"><label>יד שמאל (ק"ג)</label><input type="number" value="16"><div class="form-trend" style="color:#aaa;">→ היה 15</div></div>
+                <div class="form-group"><label>ניסיונות</label><input type="number" value="3"><div class="form-trend" style="color:#aaa;">הטוב מבין 3</div></div>
+              </div>
+              <div class="form-group" style="margin-bottom:10px;"><label>מכשיר</label><select><option>Jamar Dynamometer</option><option>מד אחיזה דיגיטלי</option></select></div>
+              <div class="form-group" style="margin-bottom:12px;"><label>הערות קליניות (אופציונלי)</label><textarea class="form-note-area">השתפר אחרי תרגילי חיזוק של היום. המטופלת דיווחה על עייפות ביד ימין בתחילת המפגש.</textarea></div>
+              <div class="form-btns"><button class="btn-save">שמור מדידת אחיזה ✓</button><button class="btn-cancel">ביטול</button></div>
+            </div>
+            <div id="tf-sts" style="display:none;">
+              <div class="freq-note">⏰ יש למדוד לפחות אחת לחודש · תועד לאחרונה: 25.2 (11 ימים)</div>
+              <div style="font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">🪑 קום-שב — בדיקת 30 שניות</div>
+              <div class="form-grid3">
+                <div class="form-group"><label>חזרות ב-30 שניות</label><input type="number" value="12"><div class="form-trend trend-up">↑ מ-10 במפגש הקודם</div></div>
+                <div class="form-group"><label>משך הבדיקה (שנ')</label><input type="number" value="30"></div>
+                <div class="form-group"><label>גובה הכיסא (ס"מ)</label><input type="number" value="44"></div>
+              </div>
+              <div style="margin-bottom:10px;"><div style="font-size:11px;color:#666;margin-bottom:6px;font-weight:500;">סיוע בשימוש</div><div style="display:flex;gap:7px;"><div style="padding:7px 12px;border-radius:8px;border:2px solid var(--terracotta);background:#FAEEE6;color:var(--terracotta);font-size:11px;font-weight:600;cursor:pointer;">ללא</div><div style="padding:7px 12px;border-radius:8px;border:2px solid var(--border);background:white;color:#666;font-size:11px;cursor:pointer;">ידיים מותרות</div><div style="padding:7px 12px;border-radius:8px;border:2px solid var(--border);background:white;color:#666;font-size:11px;cursor:pointer;">תמיכת הליכון</div></div></div>
+              <div class="form-group" style="margin-bottom:12px;"><label>הערות קליניות</label><textarea class="form-note-area"></textarea></div>
+              <div class="form-btns"><button class="btn-save">שמור תוצאת קום-שב ✓</button><button class="btn-cancel">ביטול</button></div>
+            </div>
+            <div id="tf-bia" style="display:none;">
+              <!-- Change 9: overdue note on BIA -->
+              <div class="freq-note" style="color:var(--sand);background:rgba(226,176,126,0.12);border-radius:6px;padding:6px 8px;">⏰ יש למדוד לפחות אחת לחודש · תועד לאחרונה: 1.2 — <strong style="color:var(--terracotta);">38 ימים · מדידה נדרשת!</strong></div>
+              <div style="font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;margin-top:10px;">⚖️ BIA — ניתוח הרכב גוף</div>
+              <div class="form-grid4">
+                <div class="form-group"><label>שומן גוף (%)</label><input type="number" step="0.1" value="22.4"></div>
+                <div class="form-group"><label>מסת שריר (%)</label><input type="number" step="0.1" value="38.1"></div>
+                <div class="form-group"><label>מים (%)</label><input type="number" step="0.1" value="54.8"></div>
+                <div class="form-group"><label>משקל (ק"ג)</label><input type="number" step="0.1" value="64.2"></div>
+              </div>
+              <div class="form-group" style="margin-bottom:10px;"><label>מכשיר BIA</label><select><option>InBody 270</option><option>Tanita BC-601</option><option>אחר</option></select></div>
+              <div class="bia-warn">⚠️ לוודא תנאי בדיקה: צום 2 שעות, ללא פעילות 12 שעות, ללא קפאין 4 שעות, שלפוחית ריקה</div>
+              <div class="form-group" style="margin-bottom:12px;"><label>הערות קליניות</label><textarea class="form-note-area"></textarea></div>
+              <div class="form-btns"><button class="btn-save">שמור תוצאת BIA ✓</button><button class="btn-cancel">ביטול</button></div>
+            </div>
+            <div id="tf-proe" style="display:none;">
+              <div class="freq-note">⏰ יש למדוד לפחות אחת לחודש · תועד לאחרונה: 25.2 (11 ימים)</div>
+              <div style="font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">📋 PROE — תוצאות ומאמץ מדווחים</div>
+              <div class="proe-note">ℹ️ מבנה שאלון PROE לאימות עם צוות הפיזיותרפיסטים. השדות הם placeholders — לעדכן בהתאם לכלי PROE הספציפי בשימוש באיכילוב.</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+                <div class="form-group"><label>ציון PROE כולל</label><input type="number" value="72"><div class="form-trend trend-up">↑ מ-65 במפגש הקודם</div></div>
+                <div class="form-group"><label>סוג הערכה</label><select><option>במפגש (מטפל)</option><option>דיווח עצמי (מטופלת)</option><option>מרחוק (בין מפגשים)</option></select></div>
+              </div>
+              <div style="margin-bottom:12px;"><div style="font-size:11px;color:#666;margin-bottom:7px;font-weight:500;">תחומים פונקציונליים</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;"><div class="form-group"><div style="font-size:10px;color:#888;margin-bottom:3px;">ניידות / ROM</div><input type="number" value="24"></div><div class="form-group"><div style="font-size:10px;color:#888;margin-bottom:3px;">כוח / תפקוד</div><input type="number" value="26"></div><div class="form-group"><div style="font-size:10px;color:#888;margin-bottom:3px;">עייפות / איכות חיים</div><input type="number" value="22"></div></div></div>
+              <div class="form-group" style="margin-bottom:12px;"><label>הערות קליניות</label><textarea class="form-note-area">המטופלת מדווחת על שיפור ביכולת להרים ידיים מעל הראש. ROM כתף טוב יותר בבירור מהשבוע שעבר.</textarea></div>
+              <div class="form-btns"><button class="btn-save">שמור הערכת PROE ✓</button><button class="btn-cancel">ביטול</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- end desktop-frame -->
+
+  <!-- Annotation panel -->
+  <div class="annot" id="annotPanel">
+    <h3>הערות מסך</h3>
+    <div id="annotContent"></div>
+  </div>
+
+</div><!-- end stage -->
+
+<script>
+const annotations = {
+  login:[
+    {t:'מטרת המסך',b:'כניסת מטופל באמצעות קוד גישה שסיפק הפיזיותרפיסט. אין צורך במייל/סיסמה לשלב POC.'},
+    {t:'שינוי v3',b:'"ברוכה הבאה" — ללא "מסע ההחלמה" לפי בקשת הצוות הקליני.'},
+    {t:'היקף POC',b:'קוד הגישה שמור ב-Claude Storage — אין צורך בשרת אימות לשלב הוולידציה.'}
+  ],
+  home:[
+    {t:'מטרת המסך',b:'מסך הבית היומי. המטופלת רואה משימות ממתינות, רצף השלמה ותאריך המפגש הבא.'},
+    {t:'שינוי v3 — סדר כרטיסים',b:'סדר חדש: בוקר טוב (VAS-F) ← יומן ← פעילויות ← מדדים ← שאלות. הסרנו "ההתקדמות שלי".'},
+    {t:'תזכורת (v3)',b:'פס תזכורת ויזואלי סטטי — ללא push notifications ב-POC. ייושם כ-native push ב-production.'}
+  ],
+  journal:[
+    {t:'מטרת המסך',b:'המטופלת מתעדת ולנסינג יומי: מצב רוח, אנרגיה, שינה, טקסט חופשי, ו-QPL.'},
+    {t:'שינוי v3 — שינה',b:'נוסף שדה שינה: שעות + דירוג איכות. ממוקם אחרי סרגל האנרגיה. מועבר לפיזיותרפיסט.'},
+    {t:'שדה QPL',b:'רשימת שאלות — המטופלת רושמת שאלות בין מפגשים. מופיע בפרופיל לפני המפגש.'}
+  ],
+  activity:[
+    {t:'מטרת המסך',b:'המטופלת נותנת משוב על מפגשי PT קבוצתיים, מפגשים חברתיים, ופעילויות יומיומיות.'},
+    {t:'פעילות יומיומית',b:'תיעוד פעילויות מחוץ לתוכנית הטיפול. גלוי לפיזיותרפיסט.'},
+    {t:'ערך לפיזיותרפיסט',b:'משוב הפעילויות נכנס ללוח הבקרה — המטפל רואה רמת תפקוד יומיומי.'}
+  ],
+  checkin:[
+    {t:'מטרת המסך',b:'שאלון יומי, תיעוד מדדים, ומשוב על פעילויות.'},
+    {t:'שינוי v3 — VAS-F',b:'סולם כאב הוחלף בשאלת VAS-F אנרגיה (1–10). 5 רמות עם אמוג\'י ותיאור מפורט.'},
+    {t:'שמירה אוטומטית',b:'כל תשובה נשמרת אוטומטית.'}
+  ],
+  logmetrics:[
+    {t:'מטרת המסך',b:'המטופלת מדווחת על מאמץ בפעילות (RPE) — בלבד.'},
+    {t:'שינוי v3 — מדדים קליניים',b:'כוח אחיזה, קום-שב, מסת שריר — הוסרו מהקלט של המטופלת. מוצגים כ-read-only עם הסבר "נמדד ע"י הפיזיותרפיסט".'},
+    {t:'הגיון קליני',b:'מדידות אלה דורשות מכשיר מדויק בסביבה קלינית. דיווח עצמי יטה נתונים.'}
+  ],
+  goals:[
+    {t:'מטרת המסך',b:'המטופלת רואה יעדים שהוגדרו עם הפיזיותרפיסט, ויכולה להוסיף יעדים אישיים.'},
+    {t:'שינוי v3.1 — 3 תפריטים',b:'יעד נבנה מ-3 בחירות: פעילות (בנק קבוע) + כמות (1–30) + תדירות (יום/שבוע/חודש). ללא טקסט חופשי.'},
+    {t:'תצוגה מקדימה',b:'לאחר בחירת כל 3 השדות מופיע אישור ויזואלי של היעד לפני השמירה.'}
+  ],
+  tlist:[
+    {t:'מטרת המסך',b:'מסך הבית של המטפל — כל המטופלים עם מחווני סטטוס.'},
+    {t:'שינוי v3',b:'"כאב" הוחלף ב"אנרגיה" (VAS-F) בכל עמודות המטופלים. נוסף פילטר "מדידה נדרשת".'},
+    {t:'מחוון מדידה',b:'שורת מטופל עם מדידה שחלפו >30 יום מסומנת בצהוב + "מדידה נדרשת".'}
+  ],
+  tdetail:[
+    {t:'מטרת המסך',b:'תצוגת מטופל מלאה. המטפל בודק לפני ואחרי כל מפגש.'},
+    {t:'שינוי v3 — מחוון BIA',b:'מדד BIA מסומן כ-overdue (38 ימים). Badge ייעודי בכותרת.'},
+    {t:'שאלות VAS-F',b:'"כאב" → "רמת אנרגיה" בשאלון האחרון.'}
+  ],
+  tlog:[
+    {t:'מטרת המסך',b:'המטפל מתעד מדידות קליניות. ממשק בלשוניות ל-4 מדדים.'},
+    {t:'שינוי v3 — תזכורת תדירות',b:'מעל כל טופס: "יש למדוד לפחות אחת לחודש" + מועד המדידה האחרונה.'},
+    {t:'BIA overdue',b:'ב-BIA — הערה בולטת על מדידה שחלפו 38 ימים (>30 יום).'}
+  ]
+};
+
+function switchTab(s){switchScreen(s,'mobile');}
+
+function switchScreen(id,device){
+  document.querySelectorAll('.tab').forEach(t=>{t.classList.toggle('active',t.dataset.screen===id);});
+  const mf=document.getElementById('mobileFrame');
+  const df=document.getElementById('desktopFrame');
+  if(device==='mobile'){
+    mf.style.display='block';df.style.display='none';
+    ['login','home','journal','activity','checkin','logmetrics','goals'].forEach(s=>{
+      const el=document.getElementById('s-'+s);if(el)el.style.display=(s===id)?'block':'none';
+    });
+  }else{
+    mf.style.display='none';df.style.display='block';
+    ['tlist','tdetail','tlog'].forEach(s=>{
+      const el=document.getElementById('s-'+s);if(el)el.style.display=(s===id)?'block':'none';
+    });
+  }
+  const ann=annotations[id]||[];
+  document.getElementById('annotContent').innerHTML=ann.map(a=>`<div class="annot-item"><strong>${a.t}</strong>${a.b}</div>`).join('');
+}
+
+function switchPatMetric(type){
+  // In v3, only RPE (proe) is patient-editable — others are read-only tiles
+  ['proe'].forEach(t=>{
+    const f=document.getElementById('pmf-'+t);
+    const tile=document.getElementById('ptile-'+t);
+    if(f)f.style.display=(t===type)?'block':'none';
+    if(tile)tile.classList.toggle('active',t===type);
+  });
+}
+
+function switchThMetric(type){
+  ['grip','sts','bia','proe'].forEach(t=>{
+    const f=document.getElementById('tf-'+t);
+    const btn=document.getElementById('ttab-'+t);
+    if(f)f.style.display=(t===type)?'block':'none';
+    if(btn)btn.classList.toggle('active',t===type);
+  });
+}
+
+function toggleGoal(goalId){
+  const card=document.getElementById(goalId);
+  const check=card.querySelector('.goal-check');
+  const title=card.querySelector('.goal-title');
+  if(!check)return;
+  const isChecked=check.classList.contains('checked');
+  if(isChecked){
+    check.classList.remove('checked');
+    check.textContent='☐';
+    title.style.textDecoration='none';
+    title.style.color='var(--black)';
+    card.classList.remove('goal-done');
+  }else{
+    check.classList.add('checked');
+    check.textContent='✓';
+    title.style.textDecoration='line-through';
+    title.style.color='#aaa';
+    card.classList.add('goal-done');
+  }
+}
+
+function addDailyActivity(){
+  const sel=document.getElementById('dailyActivitySelect');
+  const val=sel.value;
+  if(!val)return;
+  const [emoji, label]=val.split('|');
+  const log=document.getElementById('dailyActivityLog');
+  const now=new Date();
+  const timeStr=now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
+  const item=document.createElement('div');
+  item.className='daily-act-item';
+  item.innerHTML=`<span style="font-size:14px;">${emoji}</span><div style="flex:1;"><div style="font-size:12px;font-weight:500;color:var(--black);">${label}</div><div style="font-size:10px;color:#999;">היום, ${timeStr}</div></div><span style="font-size:10px;color:var(--alert-green);font-weight:600;">✓ נרשם</span>`;
+  log.insertBefore(item,log.firstChild);
+  sel.value='';
+}
+
+// Goal dropdowns — live preview and add
+(function setupGoalPreview(){
+  const ids=['goalActivity','goalAmount','goalFreq'];
+  function update(){
+    const act=document.getElementById('goalActivity').value;
+    const amt=document.getElementById('goalAmount').value;
+    const frq=document.getElementById('goalFreq').value;
+    const prev=document.getElementById('goalPreview');
+    if(act&&amt&&frq){
+      prev.style.display='block';
+      prev.textContent=`${act} — ${amt} פעמים ${frq}`;
+    } else {
+      prev.style.display='none';
+    }
+  }
+  // Attach after DOM ready
+  setTimeout(()=>{ids.forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('change',update);});},100);
+})();
+
+function addPatientGoal(){
+  const act=document.getElementById('goalActivity').value;
+  const amt=document.getElementById('goalAmount').value;
+  const frq=document.getElementById('goalFreq').value;
+  if(!act||!amt||!frq){
+    alert('יש לבחור פעילות, כמות ותדירות');
+    return;
+  }
+  const goalText=`${act} — ${amt} פעמים ${frq}`;
+  const list=document.getElementById('activeGoalsList');
+  const newId='goal_'+Date.now();
+  const card=document.createElement('div');
+  card.className='goal-card';
+  card.id=newId;
+  card.innerHTML=`
+    <div class="goal-row">
+      <div class="goal-check" onclick="toggleGoal('${newId}')" title="סמן כהושלם">☐</div>
+      <div class="goal-body">
+        <div class="goal-title">${goalText}</div>
+        <div class="goal-meta">${new Date().toLocaleDateString('he-IL')} · פעיל</div>
+        <div class="goal-progress-bar"><div class="goal-progress-fill" style="width:0%;background:var(--sage);"></div></div>
+        <div style="font-size:10px;color:#888;margin-top:3px;">רק התחלתי</div>
+      </div>
+    </div>`;
+  list.appendChild(card);
+  // Update counter
+  const counter=document.querySelector('#s-goals .metric-chip .val');
+  if(counter) counter.textContent=list.children.length;
+  // Reset
+  document.getElementById('goalActivity').value='';
+  document.getElementById('goalAmount').value='';
+  document.getElementById('goalFreq').value='';
+  document.getElementById('goalPreview').style.display='none';
+}
+
+// Therapist side — T2 goal dropdowns live preview and add
+(function setupT2GoalPreview(){
+  const ids=['t2GoalActivity','t2GoalAmount','t2GoalFreq'];
+  function update(){
+    const act=document.getElementById('t2GoalActivity');
+    const amt=document.getElementById('t2GoalAmount');
+    const frq=document.getElementById('t2GoalFreq');
+    const prev=document.getElementById('t2GoalPreview');
+    if(!act||!amt||!frq||!prev)return;
+    if(act.value&&amt.value&&frq.value){
+      prev.style.display='block';
+      prev.textContent=`${act.value} — ${amt.value} פעמים ${frq.value}`;
+    } else {
+      prev.style.display='none';
+    }
+  }
+  setTimeout(()=>{ids.forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('change',update);});},200);
+})();
+
+function addTherapistGoal(){
+  const act=document.getElementById('t2GoalActivity').value;
+  const amt=document.getElementById('t2GoalAmount').value;
+  const frq=document.getElementById('t2GoalFreq').value;
+  if(!act||!amt||!frq){alert('יש לבחור פעילות, כמות ותדירות');return;}
+  const goalText=`${act} — ${amt} פעמים ${frq}`;
+  const list=document.getElementById('t2ActiveGoalsList');
+  const newRow=document.createElement('div');
+  newRow.style.cssText='margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border);';
+  newRow.innerHTML=`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">
+      <div style="width:14px;height:14px;border-radius:4px;border:1.5px solid var(--border);flex-shrink:0;"></div>
+      <div style="font-size:12px;font-weight:500;color:var(--black);">${goalText}</div>
+      <span style="margin-right:auto;font-size:9px;background:#FAEEE6;color:var(--terracotta);padding:2px 6px;border-radius:4px;font-weight:600;">הוגדר עם הפיזיותרפיסט</span>
+      <span style="font-size:9px;background:#E8F5ED;color:var(--alert-green);padding:2px 6px;border-radius:4px;font-weight:600;">פעיל</span>
+    </div>
+    <div style="font-size:10px;color:#999;margin-right:22px;">${new Date().toLocaleDateString('he-IL')} · פעיל</div>`;
+  list.appendChild(newRow);
+  document.getElementById('t2GoalActivity').value='';
+  document.getElementById('t2GoalAmount').value='';
+  document.getElementById('t2GoalFreq').value='';
+  document.getElementById('t2GoalPreview').style.display='none';
+}
+
+document.getElementById('tabs').addEventListener('click',e=>{
+  const btn=e.target.closest('.tab');
+  if(btn)switchScreen(btn.dataset.screen,btn.dataset.device);
+});
+
+switchScreen('login','mobile');
+</script>
+</body>
+</html>
